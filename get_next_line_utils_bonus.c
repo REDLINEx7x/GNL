@@ -1,28 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
+/*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: moamhouc <moamhouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/01 11:13:41 by moamhouc          #+#    #+#             */
-/*   Updated: 2026/01/04 21:46:24 by moamhouc         ###   ########.fr       */
+/*   Created: 2026/01/01 21:34:28 by moamhouc          #+#    #+#             */
+/*   Updated: 2026/01/04 21:32:17 by moamhouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*ft_strdup(const char *s1)
 {
 	char	*s2;
 	size_t	i;
+	size_t	s1_len;
 
-	if (!s1)
-		return (NULL);
-	s2 = malloc(ft_strlen(s1) + 1);
+	i = 0;
+	s1_len = ft_strlen(s1);
+	s2 = malloc(sizeof(char) * (s1_len + 1));
 	if (!s2)
 		return (NULL);
-	i = 0;
 	while (s1[i])
 	{
 		s2[i] = s1[i];

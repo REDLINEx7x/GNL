@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: moamhouc <moamhouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/01/01 11:13:46 by moamhouc          #+#    #+#             */
-/*   Updated: 2026/01/04 21:39:45 by moamhouc         ###   ########.fr       */
+/*   Created: 2026/01/01 21:34:38 by moamhouc          #+#    #+#             */
+/*   Updated: 2026/01/04 10:30:51 by moamhouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static void	*free_str(char *str)
 {
@@ -62,45 +62,66 @@ static char	*leftovers(char *line)
 	char	*left;
 	int		i;
 
-	if (!line)
-		return (NULL);
 	i = 0;
 	while (line[i] && line[i] != '\n')
 		i++;
 	if (line[i] == '\n')
 		i++;
-	if (line[i] == '\0')
+	if (!line || *line == '\0')
 		return (free_str(line));
 	left = ft_strdup(line + i);
 	free(line);
 	return (left);
 }
-// return (ft_substr(line, i + 1, (ft_strlen(line) - i + 1)));
 
 char	*get_next_line(int fd)
 {
-	static char	*line;
+	static char	*line[1024];
 	char		*result;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || fd > 1024 || BUFFER_SIZE <= 0)
 		return (NULL);
-	line = fill_line(line, fd);
-	if (!line || *line == '\0')
+	line[fd] = fill_line(line[fd], fd);
+	if (!line[fd] || *line[fd] == '\0')
 	{
-		free(line);
-		line = NULL;
+		free(line[fd]);
+		line[fd] = NULL;
 		return (NULL);
 	}
-	result = extract_line(line);
-	line = leftovers(line);
+	result = extract_line(line[fd]);
+	line[fd] = leftovers(line[fd]);
 	return (result);
 }
+//#include "get_next_line.h"
+//#include <fcntl.h>
+//#include <stdio.h>
+//#include <unistd.h>
+
 //int	main(void)
 //{
 //	int		fd;
+//	char	*line;
 
-//	fd = open("README.md", O_RDONLY);
-//	if (fd < 0)
-//		return (1);
-//	printf("\n%d", fd);
+//	// 1. Create a dummy file
+//	fd = open("test.txt", O_RDWR | O_CREAT, 0644);
+//	write(fd, "Hello World\n", 12);
+//	close(fd);
+//	// 2. Open it for reading
+//	fd = open("test.txt", O_RDONLY);
+//	// 3. FORCE A READ ERROR
+//	// We close the file descriptor right before calling GNL
+//	close(fd);
+//	line = get_next_line(fd);
+//	if (line == NULL)
+//		printf("Success: GNL returned NULL on read error.\n");
+//	else
+//	{
+//		printf("Fail: GNL returned a string even though read failed.\n");
+//		free(line);
+//	}
+//	// 4. Test with a completely fake FD
+//	line = get_next_line(42);
+//	if (line == NULL)
+//		printf("Success: GNL returned NULL on invalid FD.\n");
+//	return (0);
 //}
