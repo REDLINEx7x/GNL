@@ -6,7 +6,7 @@
 /*   By: moamhouc <moamhouc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/01 11:13:46 by moamhouc          #+#    #+#             */
-/*   Updated: 2026/01/04 21:39:45 by moamhouc         ###   ########.fr       */
+/*   Updated: 2026/01/06 22:52:38 by moamhouc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ static char	*fill_line(char *line, int fd)
 	while (b > 0 && !ft_strchr(line, '\n'))
 	{
 		b = read(fd, buff, BUFFER_SIZE);
-		if (b < 0)
-			return (free_str(buff));
+		if (b == -1)
+			return (free(buff), free(line), NULL);
 		if (b == 0)
 			break ;
 		buff[b] = '\0';
@@ -82,7 +82,7 @@ char	*get_next_line(int fd)
 	static char	*line;
 	char		*result;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || BUFFER_SIZE > INT_MAX)
 		return (NULL);
 	line = fill_line(line, fd);
 	if (!line || *line == '\0')
@@ -95,12 +95,3 @@ char	*get_next_line(int fd)
 	line = leftovers(line);
 	return (result);
 }
-//int	main(void)
-//{
-//	int		fd;
-
-//	fd = open("README.md", O_RDONLY);
-//	if (fd < 0)
-//		return (1);
-//	printf("\n%d", fd);
-//}

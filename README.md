@@ -1,85 +1,152 @@
 *This project has been created as part of the 42 curriculum by moamhouc.*
 
-# Get_Next_Line
+# Get Next Line
 
 ## Description
 
-The goal of the get_next_line project is to implement a C function that reads and returns a single line from a file descriptor each time it is called. The function must handle input of arbitrary length efficiently and correctly manage memory across multiple calls.
-This project strengthens the understanding of low-level I/O behavior by requiring direct interaction with the read() system call and careful control of how data is consumed from a file descriptor. It emphasizes correct file descriptor handling across successive function calls, ensuring that input is neither lost or reread. Additionally, the use of static variables introduces state management concepts, requiring the preservation and manipulation of leftover data between calls while maintaining memory safety.
+The goal of the **get_next_line** project is to implement a C function that reads and returns a single line from a given file descriptor each time it is called.
 
-## instructions
+The function must:
 
-### compilation
+* Handle input of arbitrary length.
+* Read efficiently using the `read()` system call.
+* Correctly manage memory across multiple calls.
 
-Compile using cc with the required flags and define BUFFER_SIZE at compile time:
+This project strengthens understanding of low-level I/O by requiring direct interaction with file descriptors and careful control of how data is consumed. It emphasizes correct state handling across successive calls so that no input is lost or reread. The use of static variables introduces persistent state management while maintaining strict memory safety.
+
+---
+
+## Compilation
+
+Compile using `cc` with the required flags and define `BUFFER_SIZE` at compile time:
 
 ```bash
 cc -Wall -Wextra -Werror -D BUFFER_SIZE=n get_next_line.c get_next_line_utils.c
 ```
-### testing
 
-you can call get_next_line() with a valid file descriptor (file, standard input, or redirected input).
+---
 
-Free the returned line after each call to avoid memory leaks.
+## Usage / Testing
 
-## algorithm
+* Call `get_next_line()` with a valid file descriptor (file, standard input, or redirected input).
+* Each call returns the next line from the file descriptor, including the terminating `\n` if present.
+* The returned line must be freed by the caller to avoid memory leaks.
 
-Here’s a detailed explanation and justification of the **algorithm** in a style suitable for a **42 README**, incorporating your implementation:
+Example:
+
+```c
+char *line;
+while ((line = get_next_line(fd)) != NULL)
+{
+    printf("%s", line);
+    free(line);
+}
+```
 
 ---
 
 ## Algorithm Explanation and Justification
 
-**Algorithm flow**
+### High-Level Flow
 
+```c
 get_next_line(fd)
         |
         v
- fill_line(static_buffer, fd)
+fill_line(static_buffer, fd)
         |
         |-- read(fd, BUFFER_SIZE)
         |-- append to static buffer
         |-- stop when '\n' found or EOF
         v
- static buffer contains at least one full line
+static buffer contains at least one full line
         |
         v
- extract_line(buffer)
+extract_line(buffer)
         |
-        |-- copy characters up to '\n' (included)
+        |-- copy characters up to and including '\n'
         v
- return extracted line
+return extracted line
         |
         v
- leftovers(buffer)
+save_leftovers(buffer)
         |
         |-- keep remaining data after '\n'
         |-- free old buffer
         v
- static buffer ready for next call.
-
-
-4. **Supporting functions**
-
-   * `ft_strdup`, `ft_strjoin`, `ft_strlen`, `ft_strchr`, and `ft_substr` provide essential string manipulation operations, ensuring safe memory allocation, concatenation, and search functionality.
-   * These functions are carefully designed to handle `NULL` inputs and free memory when necessary, which prevents leaks and ensures stability.
-
-**Justification**
-
-* This algorithm avoids reading the entire file into memory, making it suitable for files of any size.
-* Using a static buffer allows efficient tracking of leftover data between calls without exposing internal state to the caller.
-* The modular design, separating reading, extraction, and leftover management, improves clarity, and testability.
-* Memory is managed carefully: every allocation has a corresponding free, and temporary buffers are freed immediately after use.
+static buffer ready for next call
+```
 
 ---
 
-## resources
-* 42 Subject PDF.
-* manual page for : (open, read, close).
-* [Handling a File by its Descriptor in C](https://www.codequoi.com/en/handling-a-file-by-its-descriptor-in-c/)
-* [file descriptor explanation](https://youtu.be/rW_NV6rf0rM)
-* [Input-output system calls](www.geeksforgeeks.org/c/input-output-system-calls-c-create-open-close-read-write/)
+### Detailed Steps
 
-### Ai usage
+1. **Persistent buffer**
 
-AI tools, such as ChatGPT, were used as a reference to understand concepts like low-level I/O, static variables, and memory management.
+   * A static buffer stores unread data between function calls.
+   * This ensures that partially read lines are preserved until completed.
+
+2. **Reading from the file descriptor**
+
+   * Data is read in chunks of size `BUFFER_SIZE` using `read()`.
+   * Each chunk is appended to the static buffer.
+   * Reading stops as soon as a newline character (`\n`) is found or EOF is reached.
+
+3. **Line extraction**
+
+   * Once a newline is present (or EOF), a new string is allocated.
+   * Characters are copied from the buffer up to and including the newline.
+
+4. **Leftover management**
+
+   * Any data after the extracted line is preserved in a new buffer.
+   * The old buffer is freed to prevent memory leaks.
+   * The leftover buffer becomes the static buffer for the next call.
+
+5. **Return value**
+
+   * The extracted line is returned.
+   * If there is no more data to read, the function returns `NULL`.
+
+---
+
+## Supporting Functions
+
+The following utility functions are used to ensure clean and safe string manipulation:
+
+* `ft_strlen` – computes string length.
+* `ft_strdup` – duplicates a string with proper allocation.
+* `ft_strchr` – searches for a character in a string.
+* `ft_strjoin` – concatenates two strings into a newly allocated buffer.
+* `ft_substr` – extracts a substring from a string.
+
+These functions are designed to:
+
+* Handle `NULL` inputs safely.
+* Allocate only what is necessary.
+* Avoid memory leaks by freeing temporary buffers when required.
+
+---
+
+## Justification
+
+* The algorithm avoids loading the entire file into memory, making it suitable for files of any size.
+* Using a static buffer ensures efficient tracking of leftover data between calls without exposing internal state to the caller.
+* Separating reading, extraction, and leftover management improves clarity, maintainability, and testability.
+* Memory management is strict and deterministic: every allocation has a clear ownership and a corresponding `free()`.
+
+---
+
+## Resources
+
+* 42 Subject PDF
+* Manual pages: `open`, `read`, `close`
+* *Handling a File by its Descriptor in C* (codequoi.com)
+* File descriptor explanation video (YouTube)
+* *Input-Output System Calls in C* (GeeksforGeeks)
+
+---
+
+## AI Usage
+
+AI tools (such as ChatGPT) were used as a reference to better understand concepts related to low-level I/O, static variables, and memory management.
